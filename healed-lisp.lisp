@@ -458,7 +458,7 @@
             (apply-continuation k `(quote (,elem ,@lst)) n "FUNCTION: CONS"))
            ((list 'cons elem (list 'quote lst))
             (apply-continuation k `(quasiquote ((unquote ,elem) ,@lst)) n "FUNCTION: CONS"))
-           (stop-computation k exp n)))
+           (otherwise (stop-computation k exp n))))
 
 (defun apply-car (exp k n)
     (match exp
@@ -745,11 +745,12 @@
              ((list 'symbolp x) 'false n "FUNCTION: SYMBOLP")
              (otherwise (stop-computation k exp n))))
 
-
 (defun apply-null (exp k n)
       (match exp
-             ((list 'null (list 'quote lst)) (apply-continuation k (convert-bool (null lst)) n "FUNCTION: NULL"))
-             ((list 'null (list 'quasiquote lst)) (apply-continuation k (convert-bool (null lst)) n "FUNCTION: NULL"))
+             ((guard (list 'null (list 'quote lst)) (listp lst))
+              (apply-continuation k (convert-bool (null lst)) n "FUNCTION: NULL"))
+             ((guard (list 'null (list 'quasiquote lst)) (listp lst))
+              (apply-continuation k (convert-bool (null lst)) n "FUNCTION: NULL"))
              (otherwise (stop-computation k exp n))))
 
 
